@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1769aa">
+<meta name="description" content="Checklist diário para organizar suas atividades do Microsoft Rewards.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<title>Meu Assistente Rewards</title>
+<style>
+:root{color-scheme:light dark;--blue:#1769aa;--line:rgba(128,128,128,.32);--surface:color-mix(in srgb,Canvas 94%,CanvasText 6%)}
+*{box-sizing:border-box}body{margin:0;background:Canvas;color:CanvasText;font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:var(--blue);color:white;padding:calc(20px + env(safe-area-inset-top)) 18px 22px}
+header h1{margin:0 0 6px;font-size:1.45rem}header p{margin:0;opacity:.95}
+main{max-width:720px;margin:auto;padding:16px 16px calc(24px + env(safe-area-inset-bottom))}
+.card{border:1px solid var(--line);border-radius:16px;padding:16px;margin:0 0 14px;background:var(--surface)}
+h2{font-size:1.05rem;margin:0 0 12px}.task{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
+.task:first-of-type{border-top:0}input[type=checkbox]{width:22px;height:22px;margin:2px 0 0;accent-color:var(--blue);flex-shrink:0}
+.task label{flex:1}.task small{display:block;opacity:.76;margin-top:3px}.links{display:grid;grid-template-columns:1fr;gap:10px}
+a.btn,button{display:block;width:100%;border:0;border-radius:11px;padding:13px 14px;font:inherit;font-weight:650;text-align:center;text-decoration:none;cursor:pointer}
+a.btn{background:var(--blue);color:white}button.secondary{background:transparent;color:CanvasText;border:1px solid var(--line)}
+.progress{height:8px;border-radius:99px;overflow:hidden;background:var(--line);margin:10px 0 6px}#bar{height:100%;width:0;background:var(--blue);transition:width .2s}
+.note{font-size:.9rem;opacity:.82}.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:.8rem}
+footer{text-align:center;font-size:.82rem;opacity:.72;padding:8px 16px 26px}
+@media(min-width:520px){.links{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header><h1>Meu Assistente Rewards</h1><p>Seu checklist diário do Microsoft Rewards</p></header>
+<main>
+<section class="card" aria-live="polite">
+<h2>Progresso de hoje</h2><div id="count">0 de 4 tarefas concluídas</div><div class="progress"><div id="bar"></div></div><div class="note" id="date"></div>
+</section>
+<section class="card"><h2>Atividades diárias</h2>
+<div class="task"><input id="daily" type="checkbox"><label for="daily">Conjunto diário<small>Abra o painel oficial, conclua as atividades disponíveis e marque quando terminar.</small></label></div>
+<div class="task"><input id="checkin" type="checkbox"><label for="checkin">Check-in / sequência<small>Confira no app ou painel se há check-in disponível.</small></label></div>
+<div class="task"><input id="bonus" type="checkbox"><label for="bonus">Atividades bônus<small>Confira quizzes, cartões e ofertas. Responda e conclua por conta própria.</small></label></div>
+<div class="task"><input id="search" type="checkbox"><label for="search">Pesquisas feitas manualmente<small>Pesquise assuntos reais do seu interesse. Este assistente não automatiza pesquisas nem pontos.</small></label></div>
+</section>
+<section class="card"><h2>Acesso rápido</h2><div class="links">
+<a class="btn" href="https://rewards.bing.com/" target="_blank" rel="noopener">Painel Rewards ↗</a>
+<a class="btn" href="https://www.bing.com/" target="_blank" rel="noopener">Abrir Bing ↗</a>
+<a class="btn" href="https://www.msn.com/" target="_blank" rel="noopener">MSN ↗</a>
+<a class="btn" href="https://support.microsoft.com/pt-br" target="_blank" rel="noopener">Suporte Microsoft ↗</a>
+</div></section>
+<section class="card"><h2>Instalar na tela inicial</h2><p class="note">No Chrome, toque no menu ⋮ e escolha <b>Adicionar à tela inicial</b> ou <b>Instalar app</b>, se essa opção aparecer. Para instalar como app PWA completo, esta página precisa estar hospedada em um endereço HTTPS.</p><span class="tag">Sem APK</span> <span class="tag">Sem senha</span> <span class="tag">Sem automação de pesquisas</span></section>
+<section class="card"><h2>Controles</h2><button class="secondary" id="reset" type="button">Desmarcar tarefas de hoje</button><p class="note">O progresso é salvo neste navegador e reinicia quando a data local muda. O funcionamento do armazenamento pode variar em modo privado ou se os dados do navegador forem apagados.</p></section>
+</main>
+<footer>Ferramenta independente de organização; não é um produto oficial da Microsoft.</footer>
+<script>
+(()=>{const ids=['daily','checkin','bonus','search'],key='meuRewardsChecklistV2';const d=new Date(),day=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;document.getElementById('date').textContent='Hoje: '+d.toLocaleDateString('pt-BR');let saved={};try{saved=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){}if(saved.day!==day)saved={day,checks:{}};function render(){let n=ids.filter(id=>document.getElementById(id).checked).length;document.getElementById('count').textContent=`${n} de ${ids.length} tarefas concluídas`;document.getElementById('bar').style.width=`${n/ids.length*100}%`;try{localStorage.setItem(key,JSON.stringify({day,checks:Object.fromEntries(ids.map(id=>[id,document.getElementById(id).checked]))}))}catch(e){}}ids.forEach(id=>{document.getElementById(id).checked=!!(saved.checks&&saved.checks[id]);document.getElementById(id).addEventListener('change',render)});document.getElementById('reset').addEventListener('click',()=>{ids.forEach(id=>document.getElementById(id).checked=false);render()});render()})();
+</script>
+</body>
+</html>
